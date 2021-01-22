@@ -1,64 +1,61 @@
-﻿using System;
+﻿using TicTacToeTests;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TDD_Course;
-using TDD_Course.TicTacToe;
 
 namespace TicTacToeGame
 {
     class Program
     {
-        private static Game g = new Game();
         static void Main(string[] args)
         {
-            Console.WriteLine(GetPrintableState());
+            Console.WriteLine("Let's Start");
+            RunGame();
+        }
 
-            while (g.GetWinner() == Winner.GameIsUnfinished)
+        public static void RunGame()
+        {
+            var game = new Game();
+            var lastGamer = State.Ball;
+            while (game.GameIsOver() == false)
             {
-                int index = int.Parse(Console.ReadLine());
-                g.MakeMove(index);
+                for (int i = 1; i <= 9; i = i + 3)
+                {
+                    Console.Write(GetExibition(i, game)); Console.Write("|"); Console.Write($"{GetExibition(i + 1, game)}"); Console.Write("|"); Console.Write($"{GetExibition(i + 2, game)}");
+                    Console.WriteLine();
+                    Console.Write("-------"); Console.Write("|"); Console.Write("-------"); Console.Write("|"); Console.Write("-------");
+                    Console.WriteLine();
+                }
 
+                Console.WriteLine("Write your choice...");
+                var key = int.Parse(Console.ReadKey().KeyChar.ToString());
+                var gamer = lastGamer == State.Cross ? State.Ball : State.Cross;
+                game.FillBox(key, gamer);
+                lastGamer = gamer;
                 Console.WriteLine();
-                Console.WriteLine(GetPrintableState());
             }
 
-            Console.WriteLine($"Result: {g.GetWinner()}");
-            Console.ReadLine();
-        }
-
-        private void testeAgregate()
-        {
-            var searchTerm = "Mário Augusto";
-            var delimeters = new[] { ' ' };
-            searchTerm.Split(delimeters)
-                .Select(x => x.ToUpper())
-                .OrderBy(x => x)
-                .Aggregate((x, y) => $"{x} {y}");
-        }
-
-        private static string GetPrintableState()
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 1; i <= 7; i += 3)
+            var winner = game.GetWinner();
+            if (winner.HasValue)
+                Console.WriteLine($"And the Winner is {game.GetWinner()}");
+            else
             {
-                sb.AppendLine("     |     |     ")
-                    .AppendLine(
-                        $"  {GetPrintableChar(i)}  |  {GetPrintableChar(i + 1)}  |  {GetPrintableChar(i + 2)}  ")
-                    .AppendLine("_____|_____|_____|");
+                Console.WriteLine($"It's a Draw! ");
+                Console.WriteLine($"Deu Velha Boy! ");
             }
 
-            return sb.ToString();
-        }
+            static string GetExibition(int i, Game game)
+            {
+                var icons = new Dictionary<State, string>()
+                {
+                    {State.Ball,"O" },
+                    {State.Cross,"X" },
+                };
 
-        private static string GetPrintableChar(int index)
-        {
-            State state = g.GetState(index);
-            if (state == State.Unset)
-                return index.ToString();
-            return state == State.Cross ? "X" : "O";
+
+                var state = game.GetState(i);
+                var box = state == State.Unfilled ? i.ToString() : icons[state];
+                return $"   {box}   ";
+            }
         }
     }
 }
